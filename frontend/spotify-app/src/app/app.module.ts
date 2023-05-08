@@ -7,12 +7,18 @@ import {HttpClientModule} from "@angular/common/http";
 import { TopArtistsComponent } from './components/top-artists/top-artists.component';
 import { LoginComponent } from './components/login/login.component';
 import {NgOptimizedImage} from "@angular/common";
+import { PlaylistsComponent } from './components/playlists/playlists.component';
+import { HomeComponent } from './components/home/home.component';
+import { UserComponent } from './components/user/user.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     TopArtistsComponent,
-    LoginComponent
+    LoginComponent,
+    PlaylistsComponent,
+    HomeComponent,
+    UserComponent
   ],
   imports: [
     BrowserModule,

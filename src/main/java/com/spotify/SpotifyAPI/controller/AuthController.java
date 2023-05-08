@@ -7,11 +7,14 @@ import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.SpotifyHttpManager;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
-import se.michaelthelin.spotify.model_objects.specification.Artist;
-import se.michaelthelin.spotify.model_objects.specification.Paging;
+import se.michaelthelin.spotify.model_objects.specification.*;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
+import se.michaelthelin.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
+import se.michaelthelin.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
+
+import org.apache.hc.core5.http.ParseException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,7 +24,7 @@ import java.net.URI;
 public class AuthController {
 
     private static final URI redirectUri = SpotifyHttpManager.makeUri("http://localhost:8888/api/get-user-code");
-    private String code = "";
+
 
     private static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
             .setClientId(Keys.CLIENT_ID.label)
@@ -33,7 +36,7 @@ public class AuthController {
     @ResponseBody
     public String spotifyLogin() {
         AuthorizationCodeUriRequest authorizationCodeUriRequest = spotifyApi.authorizationCodeUri()
-                .scope("user-read-private,user-read-email,user-top-read")
+                .scope("user-read-private,user-read-email,user-top-read,playlist-read-private,playlist-read-collaborative")
                 .show_dialog(true)
                 .build();
         final URI uri = authorizationCodeUriRequest.execute();
@@ -42,8 +45,8 @@ public class AuthController {
 
     @GetMapping("/get-user-code")
     public String getSpotifyUserCode(@RequestParam("code") String userCode, HttpServletResponse response) throws IOException {
-        code = userCode;
-        AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(code).build();
+
+        AuthorizationCodeRequest authorizationCodeRequest = spotifyApi.authorizationCode(userCode).build();
 
         try {
             final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeRequest.execute();
@@ -54,11 +57,26 @@ public class AuthController {
 
             System.out.println("Expires in: " + authorizationCodeCredentials.getExpiresIn());
 
-        } catch(IOException | SpotifyWebApiException | org.apache.hc.core5.http.ParseException e) {
+        } catch(IOException | SpotifyWebApiException | ParseException e) {
             System.out.println("Error: " + e.getMessage());
         }
         response.sendRedirect("http://localhost:4200/top-artists");
         return spotifyApi.getAccessToken();
+    }
+
+    @GetMapping("/user-profile")
+    public User getUserProfile() {
+        final GetCurrentUsersProfileRequest getCurrentUsersProfileRequest = spotifyApi.getCurrentUsersProfile().build();
+
+        try {
+            final User user = getCurrentUsersProfileRequest.execute();
+            System.out.println("Current user: " + user.toString());
+            return user;
+        } catch (IOException | SpotifyWebApiException | ParseException e) {
+            System.out.println("Error: " + e.getMessage());
+
+        }
+        return null; //user not found
     }
 
     @GetMapping("/user-top-artists")
@@ -79,5 +97,23 @@ public class AuthController {
             System.out.println("Something went wrong!\n" + e.getMessage());
         }
         return new Artist[0];
+    }
+
+    @GetMapping("/user-playlists")
+    public PlaylistSimplified[] getUserPlaylists() {
+
+        final GetListOfCurrentUsersPlaylistsRequest getListOfUsersPlaylistsRequest = spotifyApi.getListOfCurrentUsersPlaylists().build();
+
+        try {
+            final Paging<PlaylistSimplified> playlistSimplifiedPaging = getListOfUsersPlaylistsRequest.execute();
+
+            //return a list of the current user's playlists
+            return playlistSimplifiedPaging.getItems();
+
+        } catch(IOException | SpotifyWebApiException | ParseException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        return new PlaylistSimplified[0];
     }
 }

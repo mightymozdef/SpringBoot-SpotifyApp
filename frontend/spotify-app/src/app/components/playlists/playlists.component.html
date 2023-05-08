@@ -1,0 +1,6 @@
+<div class="playlist-container">
+    <div class="playlist" *ngFor="let playlist of playlists">
+        <div class="picture"><img ngSrc="{{playlist.images[0]?.url}}" width="{{ playlist.images[0]?.width ? playlist.images[0].width : 500 }}" height="{{ playlist.images[0]?.height ? playlist.images[0].height : 500 }}" alt="{{playlist.name}}"></div> 
+        <div class="title">{{playlist.name}}</div>
+    </div>
+</div>

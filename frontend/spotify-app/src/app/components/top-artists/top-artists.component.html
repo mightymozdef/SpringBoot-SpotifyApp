@@ -1,0 +1,6 @@
+<div class="artist-container">
+    <div class="artists" *ngFor="let artist of topArtists">
+      <div class="json"><pre>{{artist | json}}</pre></div>
+      <div class="picture"><img ngSrc="{{artist.images[1]?.url}}" width="{{artist.images[1]?.width}}" height="{{artist.images[1]?.height}}" alt="{{artist.name}}"></div>
+    </div>
+</div>
