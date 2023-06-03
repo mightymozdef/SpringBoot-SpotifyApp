@@ -83,9 +83,7 @@ public class AuthController {
     public Artist[] getUserTopArtists() {
 
         final GetUsersTopArtistsRequest getUsersTopArtistsRequest = spotifyApi.getUsersTopArtists()
-                .time_range("medium_term")
-//                .limit(10)
-//                .offset(5)
+                .time_range("long_term")
                 .build();
 
         try {
