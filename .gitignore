@@ -53,11 +53,13 @@ chrome-profiler-events*.json
 
 # IDE - VSCode
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
 .history/*
+frontend/spotify-app/.vscode
+frontend/spotify-app/.angular
+frontend/spotify-app/.editorconfig
+frontend/spotify-app/README.md
+frontend/spotify-app/package-lock.json
+frontend/spotify-app/node_modules
 
 # misc
 /.angular/cache
@@ -69,6 +71,10 @@ npm-debug.log
 yarn-error.log
 testem.log
 /typings
+.mvn
+mvnw
+mvnw.cmd
+HELP.md
 
 # System Files
 .DS_Store
