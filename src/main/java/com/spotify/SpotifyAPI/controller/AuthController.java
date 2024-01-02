@@ -8,16 +8,21 @@ import se.michaelthelin.spotify.SpotifyHttpManager;
 import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 import se.michaelthelin.spotify.model_objects.credentials.AuthorizationCodeCredentials;
 import se.michaelthelin.spotify.model_objects.specification.*;
+import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRefreshRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeRequest;
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
 import se.michaelthelin.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
+import se.michaelthelin.spotify.requests.data.playlists.GetPlaylistRequest;
 import se.michaelthelin.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 
 import org.apache.hc.core5.http.ParseException;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 @RestController
 @RequestMapping("/api")
@@ -31,6 +36,8 @@ public class AuthController {
             .setClientSecret(Keys.CLIENT_SECRET.label)
             .setRedirectUri(redirectUri)
             .build();
+
+    private static final AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest = spotifyApi.authorizationCodeRefresh().build();
 
     @GetMapping("/login")
     @ResponseBody
@@ -57,11 +64,35 @@ public class AuthController {
 
             System.out.println("Expires in: " + authorizationCodeCredentials.getExpiresIn());
 
+
         } catch(IOException | SpotifyWebApiException | ParseException e) {
             System.out.println("Error: " + e.getMessage());
+
+            if(e.getMessage().contains("access token")){
+                System.out.println("access token refresh");
+                authorizationCodeRefresh();
+            }
+
         }
         response.sendRedirect("http://localhost:4200/top-artists");
         return spotifyApi.getAccessToken();
+    }
+
+    public void authorizationCodeRefresh() {
+        try {
+            final CompletableFuture<AuthorizationCodeCredentials> authorizationCodeCredentialsFuture = authorizationCodeRefreshRequest.executeAsync();
+
+            final AuthorizationCodeCredentials authorizationCodeCredentials = authorizationCodeCredentialsFuture.join();
+
+            spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
+
+            System.out.println("Expires in: " + authorizationCodeCredentials.getExpiresIn());
+
+        } catch (CompletionException e) {
+            System.out.println(e.getCause().getMessage());
+        } catch (CancellationException e){
+            System.out.println("Async operation cancelled");
+        }
     }
 
     @GetMapping("/user-profile")
@@ -74,7 +105,6 @@ public class AuthController {
             return user;
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             System.out.println("Error: " + e.getMessage());
-
         }
         return null; //user not found
     }
@@ -113,5 +143,23 @@ public class AuthController {
         }
 
         return new PlaylistSimplified[0];
+    }
+
+    @GetMapping("/playlist-tracks")
+    public PlaylistTrack[] getPlaylistTracks(@RequestParam("playlistId") String playlistId) {
+
+        final GetPlaylistRequest getPlaylistRequest = spotifyApi.getPlaylist(playlistId).build();
+
+        try {
+            final Playlist playlist = getPlaylistRequest.execute();
+
+            //return a list of the current user's playlists
+            return playlist.getTracks().getItems();
+
+        } catch(IOException | SpotifyWebApiException | ParseException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+
+        return new PlaylistTrack[0];
     }
 }

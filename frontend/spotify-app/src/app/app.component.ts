@@ -19,6 +19,8 @@ export class AppComponent implements OnInit {
       this.renderer.addClass(document.body, theme.newValue)
 
     })
+
+
   }
 
 

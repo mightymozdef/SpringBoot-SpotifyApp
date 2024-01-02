@@ -20,6 +20,8 @@ export class UserComponent implements OnInit {
 
       this.user = JSON.stringify(user);
 
+      localStorage.setItem('user', JSON.stringify(user));
+
     })
   }
 
