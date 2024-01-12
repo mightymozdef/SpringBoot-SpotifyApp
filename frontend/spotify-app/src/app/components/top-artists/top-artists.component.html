@@ -1,9 +1,11 @@
 <div class="artist-container">
-    <div class="artists" *ngFor="let artist of topArtists">
-      
-      <div class="picture">
-        <img ngSrc="{{artist.images[1]?.url}}" width="300" height="300" alt="{{artist.name}}">
+    <div class="artist-card" *ngFor="let artist of topArtists">
+      <img class="artist-image" [src]="artist.images[1]?.url" alt="{{artist.name}}" priority>
+      <div class="artist-info">
+        <h2>{{artist.name}}</h2>
+        <!-- <p>Followers: {{artist.followers.total}}</p>
+        <p>Popularity: {{artist.popularity}}</p> -->
       </div>
-      <div class="json"><pre>{{artist | json}}</pre></div>
+      <!-- <div class="json"><pre>{{artist | json}}</pre></div> -->
     </div>
 </div>

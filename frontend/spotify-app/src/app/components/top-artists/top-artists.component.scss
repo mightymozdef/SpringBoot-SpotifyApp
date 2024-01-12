@@ -1,5 +1,45 @@
-.artists {
+.artist-container {
   display: flex;
-  justify-content: center;
+  flex-wrap: wrap;
+  justify-content: space-around;
   align-items: center;
 }
+
+.artist-card {
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px;
+  padding: 20px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  transition: 0.3s;
+}
+
+.artist-card:hover {
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
+
+.artist-image {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 50%;
+}
+
+.artist-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.artist-info {
+  padding-top: 20px;
+  text-align: center;
+}
+
+// .json {
+//   background-color: #f4f4f4;
+//   padding: 10px;
+//   margin-top: 10px;
+//   overflow-x: auto;
+// }
