@@ -64,6 +64,10 @@ public class AuthController {
 
             System.out.println("Expires in: " + authorizationCodeCredentials.getExpiresIn());
 
+            final User spotifyUser = spotifyApi.getCurrentUsersProfile().build().execute();
+
+            com.spotify.SpotifyAPI.model.User user = new com.spotify.SpotifyAPI.model.User(spotifyUser.getId(), spotifyApi.getRefreshToken());
+            System.out.println(user.toString());
 
         } catch(IOException | SpotifyWebApiException | ParseException e) {
             System.out.println("Error: " + e.getMessage());

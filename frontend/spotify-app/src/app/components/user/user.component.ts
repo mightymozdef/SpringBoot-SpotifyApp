@@ -4,25 +4,23 @@ import { SpotifyService } from 'src/app/services/spotify-service.service';
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
-  styleUrls: ['./user.component.scss']
+  styleUrls: ['./user.component.scss'],
 })
 export class UserComponent implements OnInit {
-
-
-  constructor(private spotifyService: SpotifyService) { }
-
+  constructor(private spotifyService: SpotifyService) {}
 
   user: any;
 
+  users: any[] = [];
+
   ngOnInit(): void {
     this.spotifyService.getUserProfile().subscribe((user) => {
-      console.log(user)
+      console.log(user);
 
       this.user = JSON.stringify(user);
+      this.users.push(user);
 
       localStorage.setItem('user', JSON.stringify(user));
-
-    })
+    });
   }
-
 }
