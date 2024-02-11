@@ -101,7 +101,7 @@ public class AuthController {
 
         try {
             final User user = getCurrentUsersProfileRequest.execute();
-            System.out.println("Current user: " + user.toString());
+            // System.out.println("Current user: " + user.toString());
             return user;
         } catch (IOException | SpotifyWebApiException | ParseException e) {
             System.out.println("Error: " + e.getMessage());
