@@ -1,5 +1,5 @@
 <div class="playlist-container">
-    <div class="playlist" *ngFor="let playlist of playlists">
+    <div class="playlist" *ngFor="let playlist of playlists" (click)="logPlaylist(playlist)">
         <div class="picture">
             <img class="playlist-image" [src]="playlist.images[0]?.url" alt="{{playlist.name}} priority">
         </div> 
