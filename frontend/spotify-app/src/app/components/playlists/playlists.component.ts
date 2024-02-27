@@ -7,6 +7,8 @@ import { SpotifyService } from 'src/app/services/spotify-service.service';
   styleUrls: ['./playlists.component.scss'],
 })
 export class PlaylistsComponent implements OnInit {
+  //TODO: need to route this code to the playlist-tracks component and implement pagination
+  //      due to spotify limiting api calls to 100 tracks (?)
   logPlaylist(playlist: any) {
     console.log(playlist);
     const playlistTracks: any[] = [];
