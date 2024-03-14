@@ -13,7 +13,6 @@ import se.michaelthelin.spotify.requests.authorization.authorization_code.Author
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
 import se.michaelthelin.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
-import se.michaelthelin.spotify.requests.data.playlists.GetPlaylistRequest;
 import se.michaelthelin.spotify.requests.data.playlists.GetPlaylistsItemsRequest;
 import se.michaelthelin.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
 
@@ -21,9 +20,15 @@ import org.apache.hc.core5.http.ParseException;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 @RestController
 @RequestMapping("/api")
@@ -100,6 +105,12 @@ public class AuthController {
         }
     }
 
+    //TODO: implement session storage for calling refreshToken after expiration ?
+    @GetMapping("/session-status")
+    public void sessionStatus() {
+
+    }
+
     @GetMapping("/user-profile")
     public User getUserProfile() {
         final GetCurrentUsersProfileRequest getCurrentUsersProfileRequest = spotifyApi.getCurrentUsersProfile().build();
@@ -149,18 +160,23 @@ public class AuthController {
     }
 
     @GetMapping("/{playlistId}/tracks")
-    public PlaylistTrack[] getPlaylistTracks(@PathVariable String playlistId) {
+    public List<PlaylistTrack> getPlaylistTracks(@PathVariable String playlistId) {
 
-        final GetPlaylistsItemsRequest getPlaylistItemsRequest = spotifyApi.getPlaylistsItems(playlistId).build();
+        List<PlaylistTrack> allTracks = new ArrayList<>();
+        final int limit = 100; //max limit per call
+        int offset = 0;
         try {
-            final Paging<PlaylistTrack> playlistTrackPaging = getPlaylistItemsRequest.execute();
-            //return a list of the current user's playlists
-            return playlistTrackPaging.getItems();
+            Paging<PlaylistTrack> playlistTrackPaging;
+            do {
+                GetPlaylistsItemsRequest getPlaylistsItemsRequest = spotifyApi.getPlaylistsItems(playlistId).limit(limit).offset(offset).build();
+                playlistTrackPaging = getPlaylistsItemsRequest.execute();
+                allTracks.addAll(Arrays.asList(playlistTrackPaging.getItems()));
+                offset += limit;
+            } while(offset < playlistTrackPaging.getTotal());
 
         } catch(IOException | SpotifyWebApiException | ParseException e) {
             System.out.println("Error: " + e.getMessage());
         }
-
-        return new PlaylistTrack[0];
+        return allTracks;
     }
 }

@@ -54,6 +54,7 @@ chrome-profiler-events*.json
 # IDE - VSCode
 .vscode/*
 .history/*
+frontend/.vscode
 frontend/spotify-app/.vscode
 frontend/spotify-app/.angular
 frontend/spotify-app/.editorconfig
