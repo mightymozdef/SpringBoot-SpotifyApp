@@ -1,27 +1,27 @@
 package com.spotify.SpotifyAPI.service;
 
-import com.spotify.SpotifyAPI.repository.UserRepository;
-import com.spotify.SpotifyAPI.model.User;
+import com.spotify.SpotifyAPI.repository.SpotifyUserRepository;
+import com.spotify.SpotifyAPI.model.SpotifyUser;
+import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SpotifyService {
 
+    private final SpotifyUserRepository spotifyUserRepository;
 
-    private UserRepository userRepository;
-
-    public SpotifyService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    public void saveRefreshToken(String userId, String refreshToken) {
-        User user = new User(userId, refreshToken);
-        userRepository.save(user);
+    public SpotifyService(SpotifyUserRepository spotifyUserRepository) {
+        this.spotifyUserRepository = spotifyUserRepository;
     }
 
     public String getRefreshToken(String userId) {
-        return userRepository.findById(userId).map(User::getRefreshToken).orElse(null);
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        
+        return spotifyUserRepository.findById(userId)
+            .map(SpotifyUser::getRefreshToken)
+            .orElseThrow(() -> new NoSuchElementException("User not found"));
     }
-
 
 }

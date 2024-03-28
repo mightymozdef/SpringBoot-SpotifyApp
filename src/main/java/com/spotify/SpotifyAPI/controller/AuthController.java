@@ -1,7 +1,12 @@
 package com.spotify.SpotifyAPI.controller;
 
 import com.spotify.SpotifyAPI.constant.Keys;
+import com.spotify.SpotifyAPI.model.SpotifyUser;
+
+import com.spotify.SpotifyAPI.repository.SpotifyUserRepository;
 import jakarta.servlet.http.HttpServletResponse;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import se.michaelthelin.spotify.SpotifyApi;
 import se.michaelthelin.spotify.SpotifyHttpManager;
@@ -13,19 +18,22 @@ import se.michaelthelin.spotify.requests.authorization.authorization_code.Author
 import se.michaelthelin.spotify.requests.authorization.authorization_code.AuthorizationCodeUriRequest;
 import se.michaelthelin.spotify.requests.data.personalization.simplified.GetUsersTopArtistsRequest;
 import se.michaelthelin.spotify.requests.data.playlists.GetListOfCurrentUsersPlaylistsRequest;
+import se.michaelthelin.spotify.requests.data.playlists.GetPlaylistRequest;
 import se.michaelthelin.spotify.requests.data.playlists.GetPlaylistsItemsRequest;
 import se.michaelthelin.spotify.requests.data.users_profile.GetCurrentUsersProfileRequest;
+import se.michaelthelin.spotify.requests.data.users_profile.GetUsersProfileRequest;
 
 import org.apache.hc.core5.http.ParseException;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.time.Instant;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.stream.Collectors;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -36,7 +44,6 @@ public class AuthController {
 
     private static final URI redirectUri = SpotifyHttpManager.makeUri("http://localhost:8888/api/get-user-code");
 
-
     private static final SpotifyApi spotifyApi = new SpotifyApi.Builder()
             .setClientId(Keys.CLIENT_ID.label)
             .setClientSecret(Keys.CLIENT_SECRET.label)
@@ -44,6 +51,18 @@ public class AuthController {
             .build();
 
     private static final AuthorizationCodeRefreshRequest authorizationCodeRefreshRequest = spotifyApi.authorizationCodeRefresh().build();
+    private final SpotifyUserRepository spotifyUserRepository;
+
+    private Instant tokenExpiryTime;
+
+    private SpotifyUser spotUser;
+
+    private String refreshToken;
+
+    public AuthController(SpotifyUserRepository spotifyUserRepository) {
+        this.spotifyUserRepository = spotifyUserRepository;
+    }
+
 
     @GetMapping("/login")
     @ResponseBody
@@ -68,12 +87,16 @@ public class AuthController {
             spotifyApi.setAccessToken(authorizationCodeCredentials.getAccessToken());
             spotifyApi.setRefreshToken(authorizationCodeCredentials.getRefreshToken());
 
-            System.out.println("Expires in: " + authorizationCodeCredentials.getExpiresIn());
+            int expires_in = authorizationCodeCredentials.getExpiresIn();
+            System.out.println("Expires in: " + expires_in);
+            tokenExpiryTime = Instant.now().plusSeconds(expires_in);
 
             final User spotifyUser = spotifyApi.getCurrentUsersProfile().build().execute();
 
-            com.spotify.SpotifyAPI.model.User user = new com.spotify.SpotifyAPI.model.User(spotifyUser.getId(), spotifyApi.getRefreshToken());
-            System.out.println(user);
+            spotUser = new SpotifyUser(spotifyUser.getId(), spotifyApi.getRefreshToken());
+            spotifyUserRepository.save(spotUser);
+
+            System.out.printf("Spotify user %s saved to database ", spotUser.getUserId());
 
         } catch(IOException | SpotifyWebApiException | ParseException e) {
             System.out.println("Error: " + e.getMessage());
@@ -105,10 +128,20 @@ public class AuthController {
         }
     }
 
-    //TODO: implement session storage for calling refreshToken after expiration ?
-    @GetMapping("/session-status")
-    public void sessionStatus() {
+    public boolean isTokenExpired() {
+        return Instant.now().isAfter(tokenExpiryTime);
+    }
 
+    @GetMapping("/refresh/{userId}")
+    public ResponseEntity<String> refresh(@PathVariable String userId) {
+        SpotifyUser user = spotifyUserRepository.findByUserId(userId);
+        if(user == null) throw new NoSuchElementException("User not found");
+        String refreshToken = user.getRefreshToken();
+        if(isTokenExpired()) { 
+            String newAccessToken = refreshAccessToken(refreshToken); 
+            return ResponseEntity.ok(newAccessToken);
+        }
+        return ResponseEntity.ok("Token is still valid");
     }
 
     @GetMapping("/user-profile")
@@ -122,6 +155,18 @@ public class AuthController {
         }
         return null; //user not found
     }
+
+    @GetMapping("/user/{userId}")
+    public User getUser(@PathVariable String userId) {
+        final GetUsersProfileRequest getUsersProfileRequest = spotifyApi.getUsersProfile(userId).build();
+        try {
+            return getUsersProfileRequest.execute();
+        }catch (IOException | SpotifyWebApiException | ParseException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+        return null;
+    }
+    
 
     @GetMapping("/user-top-artists")
     public Artist[] getUserTopArtists() {
@@ -159,24 +204,84 @@ public class AuthController {
         return new PlaylistSimplified[0];
     }
 
-    @GetMapping("/{playlistId}/tracks")
-    public List<PlaylistTrack> getPlaylistTracks(@PathVariable String playlistId) {
+    @GetMapping("/playlist/{playlistId}")
+    public Playlist getPlaylist(@PathVariable String playlistId) {
+        final GetPlaylistRequest getPlaylistRequest = spotifyApi.getPlaylist(playlistId).build();
 
-        List<PlaylistTrack> allTracks = new ArrayList<>();
+        Playlist playlist = null;
+
+        try {
+            playlist = getPlaylistRequest.execute();
+        } catch (IOException | ParseException | SpotifyWebApiException e) {
+            System.out.println("Error while fetching playlist: " + e.getMessage());
+        }
+        if(playlist == null) throw new NoSuchElementException("Playlist not found");
+        return playlist;
+    }
+
+    @GetMapping("/{playlistId}/tracks")
+    public CompletableFuture<List<PlaylistTrack>> getPlaylistTracks(@PathVariable String playlistId) {
+
+        List<CompletableFuture<Paging<PlaylistTrack>>> futures = new ArrayList<>();
         final int limit = 100; //max limit per call
         int offset = 0;
         try {
-            Paging<PlaylistTrack> playlistTrackPaging;
-            do {
-                GetPlaylistsItemsRequest getPlaylistsItemsRequest = spotifyApi.getPlaylistsItems(playlistId).limit(limit).offset(offset).build();
-                playlistTrackPaging = getPlaylistsItemsRequest.execute();
-                allTracks.addAll(Arrays.asList(playlistTrackPaging.getItems()));
+            GetPlaylistsItemsRequest getPlaylistsItemsRequest = spotifyApi.getPlaylistsItems(playlistId).limit(limit).offset(offset).build();
+            CompletableFuture<Paging<PlaylistTrack>> future = getPlaylistsItemsRequest.executeAsync();
+            futures.add(future);
+            Paging<PlaylistTrack> playlistTrackPaging = future.join();
+            offset += limit;
+            while(offset < playlistTrackPaging.getTotal()){
+                getPlaylistsItemsRequest = spotifyApi.getPlaylistsItems(playlistId).limit(limit).offset(offset).build();
+                future = getPlaylistsItemsRequest.executeAsync();
+                futures.add(future);
+                playlistTrackPaging = future.join();
                 offset += limit;
-            } while(offset < playlistTrackPaging.getTotal());
-
-        } catch(IOException | SpotifyWebApiException | ParseException e) {
+            }
+        } catch(Exception e) {
             System.out.println("Error: " + e.getMessage());
         }
-        return allTracks;
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futures.stream()
+                        .map(future -> {
+                            try {
+                                return future.join();
+                            } catch(CompletionException e) {
+                                if(e.getCause() instanceof IOException || e.getCause() instanceof SpotifyWebApiException || e.getCause() instanceof ParseException) {
+                                    System.out.println("Error while completing future: " + e.getCause().getMessage());
+                                }
+                                return null;
+                            }
+                        })
+                        .filter(Objects::nonNull)
+                        .flatMap(paging -> Arrays.stream(paging.getItems()))
+                        .collect(Collectors.toList()));
     }
-}
+
+    @GetMapping("/user-token")
+    public SpotifyUser getUserInfo() {
+        return spotUser;
+    }
+
+    // @PostMapping("/refresh-token") 
+    // public ResponseEntity<String> updateRefreshToken(@RequestBody String refreshToken) {
+    //     this.refreshToken = refreshToken;
+    //     return ResponseEntity.ok("Refresh token updated successfully");
+    // }
+    
+    public String refreshAccessToken(String refreshToken) {
+        try {
+
+            AuthorizationCodeRefreshRequest refreshRequest = spotifyApi.authorizationCodeRefresh().refresh_token(refreshToken).build();
+            AuthorizationCodeCredentials credentials = refreshRequest.execute();
+
+            String newAccessToken = credentials.getAccessToken();
+            spotifyApi.setAccessToken(newAccessToken);
+            return newAccessToken;
+        } catch(IOException | ParseException | SpotifyWebApiException e) {
+            System.out.println("Error:" + e.getMessage());
+            return null;
+        }
+    }
+
+} 

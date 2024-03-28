@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { SpotifyService } from 'src/app/services/spotify-service.service';
 
 @Component({
@@ -7,18 +8,7 @@ import { SpotifyService } from 'src/app/services/spotify-service.service';
   styleUrls: ['./playlists.component.scss'],
 })
 export class PlaylistsComponent implements OnInit {
-  //TODO: need to route this code to the playlist-tracks component and implement pagination
-  //      due to spotify limiting api calls to 100 tracks (?)
-  logPlaylist(playlist: any) {
-    console.log(playlist);
-    const playlistTracks: any[] = [];
-    this.spotifyService.getPlaylistTracks(playlist.id).subscribe((p) => {
-      playlistTracks.push(p);
-      console.log(playlistTracks);
-    });
-  }
-
-  constructor(private spotifyService: SpotifyService) {}
+  constructor(private spotifyService: SpotifyService, private router: Router) {}
 
   playlists: any[] = [];
 
@@ -26,8 +16,25 @@ export class PlaylistsComponent implements OnInit {
     this.spotifyService.getPlaylists().subscribe((playlists) => {
       playlists.forEach((p: any) => {
         // console.log(p);
-        this.playlists.push(p);
+        if (p.images !== null) {
+          this.playlists.push(p);
+        }
       });
     });
+  }
+
+  //TODO: need to route this code to the playlist-tracks component and implement pagination
+  //      due to spotify limiting api calls to 100 tracks (?)
+  logPlaylist(playlist: any) {
+    console.log(playlist);
+    console.log(
+      '---------------------------------------------------------------------------------'
+    );
+    // const playlistTracks: any[] = [];
+    // this.spotifyService.getPlaylistTracks(playlist.id).subscribe((p) => {
+    //   playlistTracks.push(p);
+    //   console.log(playlistTracks);
+    // });
+    this.router.navigate(['/playlists', playlist.id]);
   }
 }

@@ -32,6 +32,11 @@ export class SpotifyService {
     return this.httpClient.get(url, this.options);
   }
 
+  getPlaylist(playlistId: string): Observable<any> {
+    const url = `${this.apiUrl}/playlist/${playlistId}`;
+    return this.httpClient.get(url, this.options);
+  }
+
   getPlaylists(): Observable<any> {
     const url = `${this.apiUrl}/user-playlists`;
     return this.httpClient.get(url, this.options);
@@ -45,5 +50,20 @@ export class SpotifyService {
   getUserProfile(): Observable<any> {
     const url = `${this.apiUrl}/user-profile`;
     return this.httpClient.get(url, this.options);
+  }
+
+  getUser(userId: string): Observable<any> {
+    const url = `${this.apiUrl}/user/${userId}`;
+    return this.httpClient.get(url, this.options);
+  }
+
+  getUserToken(): Observable<any> {
+    const url = `${this.apiUrl}/user-token`;
+    return this.httpClient.get(url, this.options);
+  }
+
+  refresh(userId: string): Observable<any> {
+    const url = `${this.apiUrl}/refresh/${userId}`;
+    return this.httpClient.post(url, this.options);
   }
 }

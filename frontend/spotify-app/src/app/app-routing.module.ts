@@ -4,11 +4,13 @@ import { TopArtistsComponent } from "./components/top-artists/top-artists.compon
 import { LoginComponent } from "./components/login/login.component";
 import { UserComponent } from './components/user/user.component';
 import { PlaylistsComponent } from './components/playlists/playlists.component';
+import { PlaylistTracksComponent } from './components/playlist-tracks/playlist-tracks.component';
 
 const routes: Routes = [
   { path: '', component: LoginComponent }, //default route is ''
   { path: 'top-artists', component: TopArtistsComponent },
   { path: 'playlists', component: PlaylistsComponent },
+  { path: 'playlists/:id', component: PlaylistTracksComponent},
   { path: 'user', component: UserComponent }
 ];
 

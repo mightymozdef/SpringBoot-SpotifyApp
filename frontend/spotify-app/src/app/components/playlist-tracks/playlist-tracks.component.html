@@ -1,1 +1,12 @@
-<p>playlist-tracks works!</p>
+<div class="playlist-tracks-container">
+    <div class="playlist">
+        <div class="picture">
+            <!-- <img [src]="playlistInformation[0]?.image[0]?.url" alt="{{playlistInformation[0]?.name}}"> -->
+            <img src={{playlistImageURL}} alt="{{playlistInformation[0]?.name}}">
+        </div>
+        <h1>{{playlistInformation[0]?.name}}</h1>
+    </div>
+    <div class="playlist-tracks">
+        <!-- table containing the information will go here -->
+    </div>
+</div>
