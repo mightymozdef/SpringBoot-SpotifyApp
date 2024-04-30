@@ -4,7 +4,11 @@
             <!-- <img [src]="playlistInformation[0]?.image[0]?.url" alt="{{playlistInformation[0]?.name}}"> -->
             <img src={{playlistImageURL}} alt="{{playlistInformation[0]?.name}}">
         </div>
-        <h1>{{playlistInformation[0]?.name}}</h1>
+        <div class="information">
+            <h1 class="name">{{playlistInformation[0]?.name}} by {{playlistInformation[0]?.owner.id}}</h1>
+            <h6 class="description">{{playlistDescription}}</h6>
+            <p>{{playlistTracksTotal}} songs - {{convertMsToTime(playlistTotalTime)}}</p>
+        </div>
     </div>
     <div class="playlist-tracks">
         <!-- table containing the information will go here -->
