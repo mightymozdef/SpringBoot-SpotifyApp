@@ -73,12 +73,15 @@ export class PlaylistTracksComponent {
               duration: this.convertSongMsToTime(song.track.durationMs),
             });
           } else {
+            // if (song.track.album.images[0]?.url === undefined) {
+            //   console.log(song.track);
+            // }
             this.tableTracks.push({
               trackNumber: trackNumberCounter,
               name: song.track.name,
               artist: song.track.artists[0].name,
               album: song.track.album.name,
-              albumArt: song.track.album.images[2].url,
+              albumArt: song.track.album.images[0].url,
               duration: this.convertSongMsToTime(song.track.durationMs),
             });
           }

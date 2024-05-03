@@ -1,8 +1,6 @@
 .playlist {
   display: flex;
-  justify-content: space-between;
   flex-basis: 50%;
-  max-width: 1000px;
   margin: 0 auto;
   padding-bottom: 20px;
   padding-left: 20px;
@@ -22,6 +20,9 @@
   .misc img {
     border-radius: 20px;
     margin-right: 5px;
+  }
+  .name {
+    font-size: 3rem;
   }
 }
 .description {
