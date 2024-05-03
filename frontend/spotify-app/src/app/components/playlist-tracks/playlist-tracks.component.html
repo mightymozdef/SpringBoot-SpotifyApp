@@ -2,15 +2,38 @@
     <div class="playlist">
         <div class="picture">
             <!-- <img [src]="playlistInformation[0]?.image[0]?.url" alt="{{playlistInformation[0]?.name}}"> -->
-            <img src={{playlistImageURL}} alt="{{playlistInformation[0]?.name}}">
+            <img src={{playlistImageURL}} alt="{{playlistInformation[0]?.name}}" height="200px" width="200px">
         </div>
         <div class="information">
-            <h1 class="name">{{playlistInformation[0]?.name}} by {{playlistInformation[0]?.owner.id}}</h1>
-            <h6 class="description">{{playlistDescription}}</h6>
-            <p>{{playlistTracksTotal}} songs - {{convertMsToTime(playlistTotalTime)}}</p>
+            <h1 class="name">{{playlistInformation[0]?.name}}</h1>
+            <p class="description">{{playlistDescription}}</p>
+            <p class="misc"><img src={{userInformation[0]?.images[0].url}} alt="UserProfileImage" height="32px" width="32px"/>{{playlistInformation[0]?.owner.displayName}} &#x2022; {{playlistTracksTotal}} songs, {{convertMsToTime(playlistTotalTime)}}</p>
         </div>
     </div>
-    <div class="playlist-tracks">
+    <table mat-table #table [dataSource]="dataSource" class="mat-elevation-z8">
         <!-- table containing the information will go here -->
-    </div>
+        <ng-container matColumnDef="trackNumber">
+            <th mat-header-cell *matHeaderCellDef> # </th>
+            <td mat-cell *matCellDef="let element">{{element.trackNumber}}</td>
+        </ng-container>
+        <ng-container matColumnDef="title">
+            <th mat-header-cell *matHeaderCellDef> Title </th>
+            <td mat-cell *matCellDef="let element"> <img [src]="element.albumArt" /> {{element.name}}</td>
+        </ng-container>
+        <ng-container matColumnDef="artist">
+            <th mat-header-cell *matHeaderCellDef> Artist </th>
+            <td mat-cell *matCellDef="let element">{{element.artist}}</td>
+        </ng-container>
+        <ng-container matColumnDef="album">
+            <th mat-header-cell *matHeaderCellDef> Album </th>
+            <td mat-cell *matCellDef="let element">{{element.album}}</td>
+        </ng-container>
+        <ng-container matColumnDef="duration">
+            <th mat-header-cell *matHeaderCellDef> <fa-icon [icon]="faClock"></fa-icon> </th>
+            <td mat-cell *matCellDef="let element">{{element.duration}}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
 </div>

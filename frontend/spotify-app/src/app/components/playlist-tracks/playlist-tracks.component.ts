@@ -1,22 +1,42 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { SpotifyService } from 'src/app/services/spotify-service.service';
+import {
+  MatTable,
+  MatTableDataSource,
+  MatTableModule,
+} from '@angular/material/table';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faClock } from '@fortawesome/free-regular-svg-icons';
 
 @Component({
   selector: 'app-playlist-tracks',
   standalone: true,
-  imports: [],
+  imports: [MatTableModule, FontAwesomeModule],
   templateUrl: './playlist-tracks.component.html',
   styleUrl: './playlist-tracks.component.scss',
 })
 export class PlaylistTracksComponent {
   playlistTracks: any[] = [];
+  tableTracks: any[] = [];
   playlistTrackDurations: number[] = [];
   playlistInformation: any[] = [];
   playlistImageURL: string = '';
   playlistDescription: string = '';
   playlistTracksTotal: number = 0;
   playlistTotalTime: number = 0;
+  userInformation: any[] = [];
+  dataSource: MatTableDataSource<any> = new MatTableDataSource();
+  faClock = faClock;
+  displayedColumns: string[] = [
+    'trackNumber',
+    'title',
+    'artist',
+    'album',
+    'duration',
+  ];
+
+  @ViewChild(MatTable) table!: MatTable<any>;
 
   constructor(
     private spotifyService: SpotifyService,
@@ -25,26 +45,47 @@ export class PlaylistTracksComponent {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
-    // console.log(id);
+
+    this.spotifyService.getUserProfile().subscribe((user) => {
+      this.userInformation.push(user);
+    });
 
     if (id !== '') {
       this.spotifyService.getPlaylist(id).subscribe((p) => {
-        // console.log(p);
         this.playlistDescription = p.description;
         this.playlistInformation.push(p);
         this.playlistImageURL = this.playlistInformation[0].images[0].url;
         this.playlistTracksTotal = p.tracks.total;
       });
-      this.spotifyService.getPlaylistTracks(id).subscribe((p) => {
-        // console.log(p);
-        this.playlistTracks.push(p);
-
-        for (let song of p) {
-          console.log(song);
+      this.spotifyService.getPlaylistTracks(id).subscribe((t) => {
+        this.playlistTracks.push(t);
+        let trackNumberCounter = 1;
+        for (let song of t) {
           this.playlistTrackDurations.push(song.track.durationMs);
           this.playlistTotalTime += song.track.durationMs;
+          if (song.track.type === 'EPISODE') {
+            //these are not songs, but episodes added by users (podcasts for example)
+            this.tableTracks.push({
+              trackNumber: trackNumberCounter,
+              name: song.track.name,
+              artist: '',
+              album: '',
+              duration: this.convertSongMsToTime(song.track.durationMs),
+            });
+          } else {
+            this.tableTracks.push({
+              trackNumber: trackNumberCounter,
+              name: song.track.name,
+              artist: song.track.artists[0].name,
+              album: song.track.album.name,
+              albumArt: song.track.album.images[2].url,
+              duration: this.convertSongMsToTime(song.track.durationMs),
+            });
+          }
+          trackNumberCounter++;
         }
-        console.log(this.playlistTotalTime);
+        this.dataSource.data = this.tableTracks;
+        this.table.renderRows();
       });
     }
   }
@@ -54,10 +95,23 @@ export class PlaylistTracksComponent {
     const totalSeconds = ms / 1000; //convert ms to s
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = Math.floor((totalSeconds % 3600) / 3600);
+    const seconds = Math.floor(totalSeconds % 60);
     const formattedHrs = hours < 10 ? '0' + hours : hours.toString();
     const formattedMins = minutes < 10 ? '0' + minutes : minutes.toString();
     const formattedSecs = seconds < 10 ? '0' + seconds : seconds.toString();
     return `${formattedHrs} hr ${formattedMins} min ${formattedSecs} sec`;
+  };
+
+  convertSongMsToTime = (ms: number): string => {
+    const totalSeconds = ms / 1000; //convert ms to s
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = Math.floor(totalSeconds % 60);
+    const formattedHrs = hours < 10 ? '0' + hours : hours.toString();
+    const formattedMins = minutes < 10 ? '0' + minutes : minutes.toString();
+    const formattedSecs = seconds < 10 ? '0' + seconds : seconds.toString();
+    return hours > 0
+      ? `${formattedHrs}:${formattedMins}:${formattedSecs}`
+      : `${formattedMins}:${formattedSecs}`;
   };
 }
