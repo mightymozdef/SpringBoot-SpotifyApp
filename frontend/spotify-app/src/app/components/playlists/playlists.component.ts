@@ -15,7 +15,21 @@ export class PlaylistsComponent implements OnInit {
   ngOnInit(): void {
     this.spotifyService.getPlaylists().subscribe((playlists) => {
       playlists.forEach((p: any) => {
-        // console.log(p);
+        // checking to see if the playlist has an owner with null images
+        this.spotifyService.getUser(p.owner.id).subscribe((user) => {
+          console.log(
+            '-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'
+          );
+          console.log('user');
+          console.log(user);
+          console.log(user.images[0]?.url || 'No image found');
+          if (user.images[0]?.url !== null || undefined) {
+            console.log('no image found for the following user');
+            console.log(user);
+          }
+          console.log('playlist');
+          console.log(p);
+        });
         if (p.images !== null) {
           this.playlists.push(p);
         }

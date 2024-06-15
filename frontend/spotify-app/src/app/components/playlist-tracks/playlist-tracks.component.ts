@@ -7,7 +7,7 @@ import {
   MatTableModule,
 } from '@angular/material/table';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { faClock } from '@fortawesome/free-regular-svg-icons';
+import { faClock, faUserCircle } from '@fortawesome/free-regular-svg-icons';
 
 @Component({
   selector: 'app-playlist-tracks',
@@ -25,9 +25,11 @@ export class PlaylistTracksComponent {
   playlistDescription: string = '';
   playlistTracksTotal: number = 0;
   playlistTotalTime: number = 0;
+  playlistOwnerInfo: any[] = [];
   userInformation: any[] = [];
   dataSource: MatTableDataSource<any> = new MatTableDataSource();
   faClock = faClock;
+  faUserCircle = faUserCircle;
   displayedColumns: string[] = [
     'trackNumber',
     'title',
@@ -56,6 +58,11 @@ export class PlaylistTracksComponent {
         this.playlistInformation.push(p);
         this.playlistImageURL = this.playlistInformation[0].images[0].url;
         this.playlistTracksTotal = p.tracks.total;
+
+        this.spotifyService.getUser(p.owner.id).subscribe((user) => {
+          console.log(user);
+          this.playlistOwnerInfo.push(user);
+        });
       });
       this.spotifyService.getPlaylistTracks(id).subscribe((t) => {
         this.playlistTracks.push(t);
