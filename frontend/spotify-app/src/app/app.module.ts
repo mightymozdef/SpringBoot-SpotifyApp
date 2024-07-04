@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { AuthInterceptor } from './services/auth.interceptor';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -17,26 +17,19 @@ import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.com
 import { MatTableModule } from '@angular/material/table';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
-@NgModule({
-  declarations: [
-    AppComponent,
-    TopArtistsComponent,
-    LoginComponent,
-    PlaylistsComponent,
-    HomeComponent,
-    UserComponent,
-    ThemeToggleComponent,
-  ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    HttpClientModule,
-    NgOptimizedImage,
-    BrowserAnimationsModule,
-    MatTableModule,
-    FontAwesomeModule,
-  ],
-  providers: [],
-  bootstrap: [AppComponent],
-})
+@NgModule({ declarations: [
+        AppComponent,
+        TopArtistsComponent,
+        LoginComponent,
+        PlaylistsComponent,
+        HomeComponent,
+        UserComponent,
+        ThemeToggleComponent,
+    ],
+    bootstrap: [AppComponent], imports: [BrowserModule,
+        AppRoutingModule,
+        NgOptimizedImage,
+        BrowserAnimationsModule,
+        MatTableModule,
+        FontAwesomeModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
 export class AppModule {}
