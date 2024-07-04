@@ -59,12 +59,15 @@ export class PlaylistTracksComponent {
         this.playlistImageURL = this.playlistInformation[0].images[0].url;
         this.playlistTracksTotal = p.tracks.total;
 
+        console.log(p);
+
         this.spotifyService.getUser(p.owner.id).subscribe((user) => {
           console.log(user);
           this.playlistOwnerInfo.push(user);
         });
       });
       this.spotifyService.getPlaylistTracks(id).subscribe((t) => {
+        console.log(t);
         this.playlistTracks.push(t);
         let trackNumberCounter = 1;
         for (let song of t) {

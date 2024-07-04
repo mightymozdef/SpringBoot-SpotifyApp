@@ -93,7 +93,9 @@ public class AuthController {
 
             final User spotifyUser = spotifyApi.getCurrentUsersProfile().build().execute();
 
-            spotUser = new SpotifyUser(spotifyUser.getId(), spotifyApi.getRefreshToken());
+            System.out.println(spotifyUser.toString());
+
+            spotUser = new SpotifyUser(spotifyUser.getId(), spotifyApi.getRefreshToken(), spotifyUser.getType(), spotifyUser.getHref(), spotifyUser.getUri(), spotifyUser.getDisplayName());
             spotifyUserRepository.save(spotUser);
 
             System.out.printf("Spotify user %s saved to database ", spotUser.getUserId());

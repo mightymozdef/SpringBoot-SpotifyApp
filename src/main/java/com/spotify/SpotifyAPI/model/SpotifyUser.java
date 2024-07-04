@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import se.michaelthelin.spotify.enums.ModelObjectType;
 
 import java.io.Serializable;
 
@@ -18,21 +19,29 @@ public class SpotifyUser implements Serializable {
     @Column(unique = true)
     private String userId;
     private String refreshToken;
-    private String type;
+    private ModelObjectType type;
     private String href;
     private String uri;
     private String displayName;
 
-    public SpotifyUser(String userId, String refreshToken) {
+    public SpotifyUser(String userId, String refreshToken, ModelObjectType type, String href, String uri, String displayName) {
         this.userId = userId;
         this.refreshToken = refreshToken;
+        this.type = type;
+        this.href = href;
+        this.uri = uri;
+        this.displayName = displayName;
     }
 
     @Override
     public String toString() {
-        return "User{" +
-                "id='" + userId + '\'' +
+        return "SpotifyUser{" +
+                "userId='" + userId + '\'' +
                 ", refreshToken='" + refreshToken + '\'' +
+                ", type='" + type + '\'' +
+                ", href='" + href + '\'' +
+                ", uri='" + uri + '\'' +
+                ", displayName='" + displayName + '\'' +
                 '}';
     }
 }
