@@ -18,30 +18,34 @@
             </div>
         </div>
     </div>
-    <table mat-table #table [dataSource]="dataSource" class="mat-elevation-z8">
-        <!-- table containing the information will go here -->
-        <ng-container matColumnDef="trackNumber">
-            <th mat-header-cell *matHeaderCellDef> # </th>
-            <td mat-cell *matCellDef="let element">{{element.trackNumber}}</td>
-        </ng-container>
-        <ng-container matColumnDef="title">
-            <th mat-header-cell *matHeaderCellDef> Title </th>
-            <td mat-cell *matCellDef="let element"> <img [src]="element?.albumArt" height="64px" width="64px"/> {{element.name}}</td>
-        </ng-container>
-        <ng-container matColumnDef="artist">
-            <th mat-header-cell *matHeaderCellDef> Artist </th>
-            <td mat-cell *matCellDef="let element">{{element.artist}}</td>
-        </ng-container>
-        <ng-container matColumnDef="album">
-            <th mat-header-cell *matHeaderCellDef> Album </th>
-            <td mat-cell *matCellDef="let element">{{element.album}}</td>
-        </ng-container>
-        <ng-container matColumnDef="duration">
-            <th mat-header-cell *matHeaderCellDef> <fa-icon [icon]="faClock"></fa-icon> </th>
-            <td mat-cell *matCellDef="let element">{{element.duration}}</td>
-        </ng-container>
+    <div class="scrollable">
+        <table mat-table #table [dataSource]="dataSource" class="mat-elevation-z8" >
+            <!-- table containing the information will go here -->
+            <ng-container matColumnDef="trackNumber">
+                <th mat-header-cell *matHeaderCellDef> # </th>
+                <td mat-cell *matCellDef="let element">{{element.trackNumber}}</td>
+            </ng-container>
+            <ng-container matColumnDef="title">
+                <th mat-header-cell *matHeaderCellDef> Title </th>
+                <td mat-cell *matCellDef="let element"> <img [src]="element?.albumArt" height="64px" width="64px" alt="{{element.name}}"/> {{element.name}}</td>
+            </ng-container>
+            <ng-container matColumnDef="artist">
+                <th mat-header-cell *matHeaderCellDef> Artist </th>
+                <td mat-cell *matCellDef="let element">{{element.artist}}</td>
+            </ng-container>
+            <ng-container matColumnDef="album">
+                <th mat-header-cell *matHeaderCellDef> Album </th>
+                <td mat-cell *matCellDef="let element">{{element.album}}</td>
+            </ng-container>
+            <ng-container matColumnDef="duration">
+                <th mat-header-cell *matHeaderCellDef> <fa-icon [icon]="faClock"></fa-icon> </th>
+                <td mat-cell *matCellDef="let element">{{element.duration}}</td>
+            </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+       
+    </div>
+    <mat-paginator [length]="playlistTracksTotal" [pageSize]="25" [pageSizeOptions]="[25, 50, 100]" aria-label="Select page"></mat-paginator>
 </div>

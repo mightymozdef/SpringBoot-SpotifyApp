@@ -6,17 +6,18 @@ import {
   MatTableDataSource,
   MatTableModule,
 } from '@angular/material/table';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { faClock, faUserCircle } from '@fortawesome/free-regular-svg-icons';
 
 @Component({
   selector: 'app-playlist-tracks',
   standalone: true,
-  imports: [MatTableModule, FontAwesomeModule],
+  imports: [MatTableModule, FontAwesomeModule, MatPaginatorModule],
   templateUrl: './playlist-tracks.component.html',
   styleUrl: './playlist-tracks.component.scss',
 })
-export class PlaylistTracksComponent {
+export class PlaylistTracksComponent implements OnInit {
   playlistTracks: any[] = [];
   tableTracks: any[] = [];
   playlistTrackDurations: number[] = [];
@@ -39,6 +40,8 @@ export class PlaylistTracksComponent {
   ];
 
   @ViewChild(MatTable) table!: MatTable<any>;
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  totalItems = 100;
 
   constructor(
     private spotifyService: SpotifyService,
@@ -98,6 +101,7 @@ export class PlaylistTracksComponent {
           trackNumberCounter++;
         }
         this.dataSource.data = this.tableTracks;
+        this.dataSource.paginator = this.paginator;
         this.table.renderRows();
       });
     }

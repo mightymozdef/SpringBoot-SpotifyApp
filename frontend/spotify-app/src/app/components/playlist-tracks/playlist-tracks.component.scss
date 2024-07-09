@@ -1,10 +1,14 @@
 .playlist {
   display: flex;
-  flex-basis: 50%;
+  // flex-basis: 50%;
   margin: 0 auto;
   padding-bottom: 20px;
   padding-left: 20px;
   padding-right: 20px;
+  // position: sticky;
+  // top: 60px;
+  // z-index: 1;
+  // background: rgb(33, 37, 41);
 }
 .information {
   padding-left: 20px;
@@ -29,24 +33,28 @@
   max-width: 900px;
 }
 
-// .mat-table {
-//   overflow-x: scroll;
-//   // position: sticky;
-// }
+.playlist-tracks-container {
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+  max-height: 100vh;
+}
 
-// .mat-cell,
-// .mat-header-cell {
-//   word-wrap: initial;
-//   display: table-cell;
-//   padding: 0px 10px;
-//   line-break: unset;
-//   width: 100%;
-//   white-space: nowrap;
-//   overflow: hidden;
-//   vertical-align: middle;
-// }
+.scrollable {
+  overflow-y: auto;
+  max-height: calc(75vh);
+  flex-grow: 1;
+}
 
-// .mat-row,
-// .mat-header-row {
-//   display: table-row;
-// }
+table {
+  display: block;
+  width: 100%;
+}
+
+.paginator {
+  margin-top: auto; // Pushes it to the bottom of the flex container
+  position: sticky;
+  bottom: 0;
+  background-color: white; // Ensures readability over the content scrolled behind
+  z-index: 1000; // Ensures it stays on top of other content
+}

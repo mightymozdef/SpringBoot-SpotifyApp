@@ -1,6 +1,10 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { AuthInterceptor } from './services/auth.interceptor';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -15,21 +19,29 @@ import { UserComponent } from './components/user/user.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ThemeToggleComponent } from './components/theme-toggle/theme-toggle.component';
 import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
-@NgModule({ declarations: [
-        AppComponent,
-        TopArtistsComponent,
-        LoginComponent,
-        PlaylistsComponent,
-        HomeComponent,
-        UserComponent,
-        ThemeToggleComponent,
-    ],
-    bootstrap: [AppComponent], imports: [BrowserModule,
-        AppRoutingModule,
-        NgOptimizedImage,
-        BrowserAnimationsModule,
-        MatTableModule,
-        FontAwesomeModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+@NgModule({
+  declarations: [
+    AppComponent,
+    TopArtistsComponent,
+    LoginComponent,
+    PlaylistsComponent,
+    HomeComponent,
+    UserComponent,
+    ThemeToggleComponent,
+  ],
+  bootstrap: [AppComponent],
+  imports: [
+    BrowserModule,
+    AppRoutingModule,
+    NgOptimizedImage,
+    BrowserAnimationsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    FontAwesomeModule,
+  ],
+  providers: [provideHttpClient(withInterceptorsFromDi())],
+})
 export class AppModule {}
